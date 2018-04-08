@@ -12,11 +12,10 @@ Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 
 #define LED_PIN      6   // which pin your pixels are connected to
 #define NUM_LEDS    16   // how many LEDs you have
-#define BRIGHTNESS 200   // 0-255, higher number is brighter. 
+#define BRIGHTNESS 100   // 0-255, higher number is brighter. 
 #define SATURATION 255   // 0-255, 0 is pure white, 255 is fully saturated color
-#define SPEED       50   // How fast the colors move.  Higher numbers = faster motion
+#define SPEED       500   // How fast the colors move.  Higher numbers = faster motion
 #define STEPS        10   // How wide the bands of color are.  1 = more like a gradient, 10 = more like stripes
-#define BUTTON_PIN   2   // button is connected to pin 2 and GND
 #define COLOR_ORDER GRB
 
 CRGB leds[NUM_LEDS];
@@ -27,8 +26,8 @@ TBlendType    currentBlending;
 // palattes
 const TProgmemPalette16 LighterPurpleColors_p PROGMEM =
 {
-  CRGB::MediumPurple,
   CRGB::Purple,
+  CRGB::DarkMagenta,
   CRGB::Violet ,
   CRGB::Purple,
 
@@ -45,7 +44,7 @@ const TProgmemPalette16 LighterPurpleColors_p PROGMEM =
   CRGB::Purple,
   CRGB::Violet ,
   CRGB::DarkMagenta ,
-  CRGB::Magenta
+  CRGB::Black
 };
 
 
@@ -55,9 +54,10 @@ void setup()
   // Setup LEDs
   delay( 2000 ); // power-up safety delay
   FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
-  FastLED.setBrightness(  BRIGHTNESS );
+  FastLED.setBrightness(  0 );
   currentBlending = LINEARBLEND;
-  FastLED.clear ();
+  FastLED.clear();
+  FastLED.show();
 
 
 #ifndef ESP8266
@@ -104,28 +104,40 @@ void loop()
   if (abs(newVector - storedVector) > MOVE_THRESHOLD) {
     Serial.println("Show Colors!");
     currentPalette = LighterPurpleColors_p;
-    swipeColors(1);
-
+    swipeColors(10);
+    FastLED.clear();
   }
+  FastLED.clear();
 }
 
 
 void swipeColors(uint8_t interations) {
-
+  FastLED.setBrightness(0);
+  FillLEDsFromPaletteColors(0);
+  fadeIn();
 
   for (int i = 0; i <= NUM_LEDS * interations; i++) {
 
     FillLEDsFromPaletteColors(i);
     FastLED.show();
     FastLED.delay(1000 / SPEED);
-
-
   }
 
-
-  FastLED.clear ();
+  FastLED.setBrightness(0);
+  FastLED.clear();
+  FastLED.show();
 }
 
+
+
+void fadeIn(){
+ for(int i=0; i<= BRIGHTNESS; i++){
+    FastLED.setBrightness(i);
+    FastLED.show();
+    delay(9);
+ }
+ 
+}
 
 void FillLEDsFromPaletteColors( uint8_t colorIndex) {
   for ( int i = 0; i < NUM_LEDS; i++) {
@@ -134,6 +146,20 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex) {
   }
 }
 
+
+//void  fadeUp ()
+//{
+//
+//      for ( int i = 0; i < NUM_LEDS; i++ )
+//          {
+//            leds[i] = CRGB::Orange; // Can be any colour
+//            leds[i].maximizeBrightness(FastLED_fade_counter);  // 'FastLED_fade_counter' How high we want to fade up to 255 = maximum.
+//          }
+//
+//            FastLED.show();
+//            FastLED_fade_counter ++ ;   // Increment
+//
+//}
 
 
 
